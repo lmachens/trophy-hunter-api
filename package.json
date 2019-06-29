@@ -1,0 +1,22 @@
+{
+  "name": "trophy-hunter-api",
+  "version": "1.0.0",
+  "description": "Open API for League of Legends stats",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lmachens/trophy-hunter-api.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lmachens/trophy-hunter-api/issues"
+  },
+  "homepage": "https://github.com/lmachens/trophy-hunter-api#readme",
+  "devDependencies": {
+    "prettier": "^1.18.2"
+  }
+}
