@@ -6,7 +6,15 @@ if (!process.env.MONGODB_URI) {
 
 let client: MongoClient = null;
 
-const getDb = (dbName: string) => {
+export const db = (dbName: string) => {
+  if (client.isConnected) {
+    // client connected, quick return
+    return client.db(dbName);
+  }
+  return null;
+};
+
+export const connect = () => {
   if (client && !client.isConnected) {
     // client discard
     client = null;
@@ -15,9 +23,6 @@ const getDb = (dbName: string) => {
   if (client === null) {
     // client init
     client = new MongoClient(process.env.MONGODB_URI, { useNewUrlParser: true });
-  } else if (client.isConnected) {
-    // client connected, quick return
-    return client.db(dbName);
   }
 
   return new Promise<Db>((resolve, reject) => {
@@ -29,9 +34,7 @@ const getDb = (dbName: string) => {
       }
 
       // connected
-      resolve(client.db(dbName));
+      resolve();
     });
   });
 };
-
-export default getDb;

@@ -1,0 +1,212 @@
+{
+  "_id": "8BHPpkAQcsbnG85p6",
+  "championId": 1,
+  "createdAt": ISODate("2018-10-13T10:26:04.525Z"),
+  "stats": {
+    "DUO_SUPPORT": {
+      "gamesPlayed": 1394,
+      "winRate": 0.467718794835007,
+      "playRate": 0.00351670012100745,
+      "banRate": 0.000661378442174165,
+      "damageComposition": {
+        "percentTrue": 0.0554947104294588,
+        "percentMagical": 0.890115295961632,
+        "totalTrue": 691.100430416069,
+        "totalMagical": 11085.0035868006,
+        "percentPhysical": 0.0543241529933143,
+        "total": 12453.4469153515,
+        "totalPhysical": 676.522955523673
+      },
+      "firstItems": {
+        "highestCount": {
+          "count": 494,
+          "wins": 226,
+          "winRate": 0.45748987854251,
+          "items": ["2003", "2003", "3303"]
+        },
+        "highestWinrate": {
+          "count": 248,
+          "wins": 116,
+          "winRate": 0.467741935483871,
+          "items": ["1056", "2003", "2003"]
+        }
+      },
+      "finalItems": {
+        "highestCount": {
+          "count": 279,
+          "wins": 120,
+          "winRate": 0.43010752688172,
+          "items": ["3020", "3152", "3907", "3092", "3165", "2065"]
+        },
+        "highestWinrate": {
+          "count": 279,
+          "wins": 120,
+          "winRate": 0.43010752688172,
+          "items": ["3020", "3152", "3907", "3092", "3165", "2065"]
+        }
+      },
+      "skillOrder": {
+        "highestCount": {
+          "count": 506,
+          "wins": 234,
+          "winRate": 0.462450592885375,
+          "order": [
+            "Q",
+            "W",
+            "E",
+            "Q",
+            "Q",
+            "R",
+            "Q",
+            "W",
+            "Q",
+            "W",
+            "R",
+            "W",
+            "W",
+            "E",
+            "E",
+            "R",
+            "E",
+            "E"
+          ]
+        },
+        "highestWinrate": {
+          "count": 506,
+          "wins": 234,
+          "winRate": 0.462450592885375,
+          "order": [
+            "Q",
+            "W",
+            "E",
+            "Q",
+            "Q",
+            "R",
+            "Q",
+            "W",
+            "Q",
+            "W",
+            "R",
+            "W",
+            "W",
+            "E",
+            "E",
+            "R",
+            "E",
+            "E"
+          ]
+        }
+      }
+    },
+    "MIDDLE": {
+      "gamesPlayed": 4143,
+      "winRate": 0.514602944726044,
+      "playRate": 0.010451713487327,
+      "banRate": 0.000661378442174165,
+      "damageComposition": {
+        "percentTrue": 0.0494037020956541,
+        "percentMagical": 0.91334421772905,
+        "totalTrue": 1000.30678252474,
+        "totalMagical": 18493.0354815351,
+        "percentPhysical": 0.037210845563576,
+        "total": 20247.6077721458,
+        "totalPhysical": 753.430605841178
+      },
+      "firstItems": {
+        "highestCount": {
+          "count": 2199,
+          "wins": 1143,
+          "winRate": 0.519781718963165,
+          "items": ["1056", "2003", "2003"]
+        },
+        "highestWinrate": {
+          "count": 82,
+          "wins": 48,
+          "winRate": 0.585365853658537,
+          "items": ["2033"]
+        }
+      },
+      "finalItems": {
+        "highestCount": {
+          "count": 690,
+          "wins": 272,
+          "winRate": 0.394202898550725,
+          "items": ["3020", "3157", "3152", "3165", "3041", "3135"]
+        },
+        "highestWinrate": {
+          "count": 124,
+          "wins": 57,
+          "winRate": 0.459677419354839,
+          "items": ["3027", "3020", "3157", "3089", "3041", "3135"]
+        }
+      },
+      "skillOrder": {
+        "highestCount": {
+          "count": 1907,
+          "wins": 967,
+          "winRate": 0.507079181961196,
+          "order": [
+            "Q",
+            "W",
+            "E",
+            "Q",
+            "Q",
+            "R",
+            "Q",
+            "W",
+            "Q",
+            "W",
+            "R",
+            "W",
+            "W",
+            "E",
+            "E",
+            "R",
+            "E",
+            "E"
+          ]
+        },
+        "highestWinrate": {
+          "count": 829,
+          "wins": 435,
+          "winRate": 0.524728588661037,
+          "order": [
+            "Q",
+            "W",
+            "Q",
+            "E",
+            "Q",
+            "R",
+            "Q",
+            "W",
+            "Q",
+            "W",
+            "R",
+            "W",
+            "W",
+            "E",
+            "E",
+            "R",
+            "E",
+            "E"
+          ]
+        }
+      },
+      "runes": {
+        "highestCount": {
+          "count": 217,
+          "wins": 119,
+          "winRate": 0.548387096774194,
+          "order": ["8112", "8126", "8138", "8135", "8200", "8233", "8236", "5008", "5008", "5001"]
+        },
+        "highestWinrate": {
+          "count": 217,
+          "wins": 119,
+          "winRate": 0.548387096774194,
+          "order": ["8112", "8126", "8138", "8135", "8200", "8233", "8236", "5008", "5008", "5001"]
+        }
+      }
+    }
+  },
+  "updatedAt": ISODate("2019-03-22T10:24:49.038Z")
+}

@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/lmachens/trophy-hunter-api#readme",
   "devDependencies": {
+    "@types/mongodb": "^3.1.28",
     "@types/node": "^12.0.10",
     "cross-env": "^5.2.0",
     "prettier": "^1.18.2",
