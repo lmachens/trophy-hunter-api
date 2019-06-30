@@ -4,8 +4,10 @@
   "description": "Open API for League of Legends stats",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev app.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rimraf dist && tsc --noEmit false -p tsconfig.json",
+    "dev": "ts-node-dev src/app.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cross-env NODE_ENV=production node dist/app.js"
   },
   "repository": {
     "type": "git",
@@ -19,7 +21,9 @@
   "homepage": "https://github.com/lmachens/trophy-hunter-api#readme",
   "devDependencies": {
     "@types/node": "^12.0.10",
+    "cross-env": "^5.2.0",
     "prettier": "^1.18.2",
+    "rimraf": "^2.6.3",
     "ts-node-dev": "^1.0.0-pre.40",
     "typescript": "^3.5.2"
   },

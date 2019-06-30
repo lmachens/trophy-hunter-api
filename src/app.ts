@@ -10,7 +10,7 @@ app.get('/', (_req, res) => {
 });
 
 app.listen(port, () => {
-  console.log('Trophy Hunter LoL API is running!');
+  console.log(`Trophy Hunter LoL API is running! http://localhost:${port}`);
   console.log('NODE_ENV:', process.env.NODE_ENV);
   console.log('Version:', process.version);
 });
