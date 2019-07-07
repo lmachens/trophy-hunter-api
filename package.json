@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "rimraf dist && tsc --noEmit false -p tsconfig.json",
-    "dev": "ts-node-dev src/app.ts",
+    "dev": "ts-node-dev -r dotenv/config src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "cross-env NODE_ENV=production node dist/app.js"
   },
@@ -23,6 +23,7 @@
     "@types/mongodb": "^3.1.28",
     "@types/node": "^12.0.10",
     "cross-env": "^5.2.0",
+    "dotenv": "^8.0.0",
     "prettier": "^1.18.2",
     "rimraf": "^2.6.3",
     "ts-node-dev": "^1.0.0-pre.40",
