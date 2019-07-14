@@ -1,7 +1,7 @@
 import express from 'express';
 import { connect } from './utils/mongo';
 import { getChamps, getChamp } from './routes/champs';
-import { putMatch } from './routes/matches';
+import { postMatch } from './routes/matches';
 
 const port = 5000;
 const app = express();
@@ -13,7 +13,7 @@ connect().then(() => {
 
   app.get('/champs', getChamps);
   app.get('/champs/:id', getChamp);
-  app.put('/matches', putMatch);
+  app.post('/matches', postMatch);
 
   app.listen(port, () => {
     console.log(`Trophy Hunter LoL API is running! http://localhost:${port}`);
