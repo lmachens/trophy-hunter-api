@@ -5,7 +5,7 @@ if (!process.env.MONGODB_URI || !process.env.MONGODB_DB) {
 }
 
 const client = new MongoClient(process.env.MONGODB_URI, { useNewUrlParser: true });
-client.db(process.env.MONGODB_DB);
+
 export function connect() {
   return new Promise<Db>((resolve, reject) => {
     client.connect(err => {
@@ -25,5 +25,5 @@ export function collection(collectionName: string) {
     // client connected, quick return
     return client.db(process.env.MONGODB_DB).collection(collectionName);
   }
-  return null;
+  throw new Error('Database is not connected');
 }
