@@ -1,71 +1,121 @@
-import match from '../match.json';
 import Champs from '../models/champs';
 import Matches from '../models/matches';
 import { MatchV4 } from 'riot-api-typedef';
 import { sortNumbers } from '../utils/sort';
+import thApi from '../utils/th-api';
 
 export async function postMatch(req, res) {
-  const { matchId } = req.query;
-  if (!matchId) {
+  let { matchId, platformId } = req.query;
+  if (!matchId || !platformId) {
     return res.end(403, 'Invalid matchId');
   }
+  matchId = parseInt(matchId.trim());
+  platformId = platformId.trim().toUpperCase();
 
-  const now = new Date();
-
-  match.participants.forEach(async (participant: MatchV4.ParticipantDTO) => {
-    try {
-      const champ = await Champs().findOne({
-        championId: participant.championId
-      });
-
-      const { mapId } = match;
-      const maps = (champ && champ.maps) || {};
-      const win = participant.stats.win ? 1 : 0;
-
-      const map = {
-        stats: {},
-        positions: {},
-        ...(maps[mapId] || {})
-      };
-      map.stats = createStats({
-        data: { mapId },
-        existingStats: map.stats,
-        now,
-        win
-      });
-
-      const { role, lane } = participant.timeline;
-      const positionId = createId({ role, lane });
-      map.positions[positionId] = createPositionStats({
-        participant,
-        now,
-        win,
-        existingStats: map.positions[positionId]
-      });
-
-      await Matches().insertOne({
-        gameId: match.gameId,
-        analyzedAt: now
-      });
-
-      await Champs().updateOne(
-        {
-          championId: participant.championId
-        },
-        {
-          $set: {
-            [`maps.${match.mapId}`]: map
-          }
-        },
-        {
-          upsert: true
-        }
-      );
-    } catch (error) {
-      console.log(error);
+  try {
+    if (await Matches().findOne({ gameId: matchId, platformId })) {
+      res.status(400);
+      return res.end('Already analyzed');
     }
-  });
-  res.end(matchId);
+    const match = (await thApi.get(`/match?platformId=${platformId}&matchId=${matchId}`)).data;
+
+    const now = new Date();
+    match.participants.forEach(async (participant: MatchV4.ParticipantDTO) => {
+      try {
+        const champ = await Champs().findOne({
+          championId: participant.championId
+        });
+
+        const { mapId } = match;
+        const maps = (champ && champ.maps) || {};
+        const win = participant.stats.win ? 1 : 0;
+
+        const map = {
+          stats: {},
+          positions: {},
+          ...(maps[mapId] || {})
+        };
+        map.stats = createStats({
+          data: { mapId },
+          existingStats: map.stats,
+          now,
+          win
+        });
+
+        const { role, lane } = participant.timeline;
+        const positionId = getPosition({ role, lane });
+        map.positions[positionId] = createPositionStats({
+          participant,
+          now,
+          win,
+          existingStats: map.positions[positionId]
+        });
+
+        await Champs().updateOne(
+          {
+            championId: participant.championId
+          },
+          {
+            $set: {
+              [`maps.${match.mapId}`]: map
+            }
+          },
+          {
+            upsert: true
+          }
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    });
+
+    const matchesCount = await Matches()
+      .find({ mapId: match.mapId })
+      .count();
+
+    const championIds = match.participants.map(p => p.championId);
+    const banIds = match.teams.reduce(
+      (bans, team) => [...bans, ...team.bans.map(ban => ban.championId)],
+      []
+    );
+    await Champs()
+      .find({
+        [`maps.${match.mapId}`]: { $exists: true }
+      })
+      .forEach(async champ => {
+        const picked = championIds.includes(champ.championId) ? 1 : 0;
+        const banned = banIds.includes(champ.championId) ? 1 : 0;
+
+        const existingStats = champ.maps[match.mapId].stats;
+        const pickRate =
+          (matchesCount * (existingStats.pickRate || 0) + picked) / (matchesCount + 1);
+        const banRate = (matchesCount * (existingStats.banRate || 0) + banned) / (matchesCount + 1);
+
+        await Champs().updateOne(
+          {
+            championId: champ.championId
+          },
+          {
+            $set: {
+              [`maps.${match.mapId}.stats.pickRate`]: pickRate,
+              [`maps.${match.mapId}.stats.banRate`]: banRate
+            }
+          }
+        );
+      });
+
+    await Matches().insertOne({
+      gameId: match.gameId,
+      mapId: match.mapId,
+      platformId,
+      analyzedAt: now
+    });
+
+    res.end('Analyzed');
+  } catch (error) {
+    console.error(error);
+    res.status(200).end('Error');
+  }
 }
 
 function createPositionStats({ participant, existingStats = {}, now, win }) {
@@ -78,7 +128,6 @@ function createPositionStats({ participant, existingStats = {}, now, win }) {
   };
 
   positionStats.stats = createStats({
-    data: { role: participant.timeline.role, lane: participant.timeline.lane },
     existingStats: positionStats.stats,
     now,
     win
@@ -122,7 +171,7 @@ function createId(data) {
   return ids.join('-');
 }
 
-function createStats({ data, existingStats = {}, now, win }) {
+function createStats({ data = {}, existingStats = {}, now, win }) {
   const stats = {
     createdAt: now,
     matches: 0,
@@ -135,3 +184,31 @@ function createStats({ data, existingStats = {}, now, win }) {
   stats.matches++;
   return stats;
 }
+
+const getPosition = ({ role, lane }) => {
+  if (lane === 'JUNGLE') {
+    return 'JUNGLE';
+  }
+
+  switch (role) {
+    case 'DUO':
+    case 'DUO_CARRY':
+      if (lane === 'MIDDLE') {
+        return 'MIDDLE';
+      }
+      if (lane === 'TOP') {
+        return 'TOP';
+      }
+      return 'BOTTOM';
+    case 'DUO_SUPPORT':
+      return 'UTILITY';
+    case 'SOLO':
+      if (lane === 'TOP') {
+        return 'TOP';
+      }
+      if (lane === 'MIDDLE') {
+        return 'MIDDLE';
+      }
+  }
+  return 'TOP';
+};

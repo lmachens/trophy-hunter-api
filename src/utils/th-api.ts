@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const instance = axios.create({
+const thApi = axios.create({
   baseURL: 'https://api-lol.th.gl/'
 });
 
-export default instance;
+export default thApi;
