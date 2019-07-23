@@ -1,5 +1,6 @@
 import Champs from '../models/champs';
 
+// not implemented
 export async function getChamps(_req, res) {
   const champs = await Champs()
     .find({})
@@ -8,7 +9,22 @@ export async function getChamps(_req, res) {
 }
 
 export async function getChamp(req, res) {
-  const champs = await Champs().findOne({ id: req });
+  const { mapId } = req.query;
+  const championId = parseInt(req.params.championId);
+  if (!mapId || !championId) {
+    return res.status(403).end('Invalid mapId or championId');
+  }
 
-  res.json(champs);
+  const champ = await Champs().findOne(
+    { championId, [`maps.${mapId}`]: { $exists: true } },
+    {
+      fields: {
+        _id: false,
+        championId: true,
+        [`maps.${mapId}`]: true
+      }
+    }
+  );
+
+  res.json(champ);
 }

@@ -20,15 +20,14 @@
   },
   "homepage": "https://github.com/lmachens/trophy-hunter-api#readme",
   "devDependencies": {
-    "@types/mongodb": "^3.1.28",
-    "@types/node": "^12.0.10",
+    "@types/mongodb": "^3.1.29",
+    "@types/node": "^12.6.8",
     "cross-env": "^5.2.0",
     "dotenv": "^8.0.0",
     "prettier": "^1.18.2",
     "rimraf": "^2.6.3",
-    "riot-api-typedef": "^1.1.0",
     "ts-node-dev": "^1.0.0-pre.40",
-    "typescript": "^3.5.2"
+    "typescript": "^3.5.3"
   },
   "dependencies": {
     "axios": "^0.19.0",

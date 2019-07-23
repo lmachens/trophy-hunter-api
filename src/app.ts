@@ -1,6 +1,6 @@
 import express from 'express';
 import { connect } from './utils/mongo';
-import { getChamps, getChamp } from './routes/champs';
+import { getChamp } from './routes/champs';
 import { postMatch } from './routes/matches';
 
 const port = 5000;
@@ -11,8 +11,8 @@ connect().then(() => {
     res.end('API');
   });
 
-  app.get('/champs', getChamps);
-  app.get('/champs/:id', getChamp);
+  //app.get('/champs', getChamps);
+  app.get('/champs/:championId', getChamp);
   app.post('/matches', postMatch);
 
   app.listen(port, () => {
