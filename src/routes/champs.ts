@@ -5,6 +5,7 @@ export async function getChamps(_req, res) {
   const champs = await Champs()
     .find({})
     .toArray();
+  res.set('Cache-Control', 'public, max-age=86400');
   res.json(champs);
 }
 
@@ -18,7 +19,7 @@ export async function getChamp(req, res) {
   const champ = await Champs().findOne(
     { championId, [`maps.${mapId}`]: { $exists: true } },
     {
-      fields: {
+      projection: {
         _id: false,
         championId: true,
         [`maps.${mapId}`]: true
@@ -26,5 +27,6 @@ export async function getChamp(req, res) {
     }
   );
 
+  res.set('Cache-Control', 'public, max-age=86400');
   res.json(champ);
 }
