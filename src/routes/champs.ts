@@ -1,14 +1,5 @@
 import Champs from '../models/champs';
 
-// not implemented
-export async function getChamps(_req, res) {
-  const champs = await Champs()
-    .find({})
-    .toArray();
-  res.set('Cache-Control', 'public, max-age=86400');
-  res.json(champs);
-}
-
 export async function getChamp(req, res) {
   const { mapId } = req.query;
   const championId = parseInt(req.params.championId);

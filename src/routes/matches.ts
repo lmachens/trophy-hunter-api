@@ -5,6 +5,7 @@ import getPosition from '../utils/getPosition';
 import createId from '../utils/createId';
 import getSkillOrder from '../utils/getSkillOrder';
 import getItemsPurchased from '../utils/getItemsPurchased';
+import updateMatchupStats from '../utils/updateMatchupStats';
 
 function createStats({ data = {}, existingStats = {}, now, win }) {
   const stats = {
@@ -25,13 +26,16 @@ function createDamageComposition({
   magicDamageDealt,
   physicalDamageDealt,
   trueDamageDealt,
-  existingDamageComposition
+  existingDamageComposition,
+  matches
 }) {
   return {
-    total: (existingDamageComposition.total + totalDamageDealt) / 2,
-    totalTrue: (existingDamageComposition.totalTrue + trueDamageDealt) / 2,
-    totalMagical: (existingDamageComposition.totalMagical + magicDamageDealt) / 2,
-    totalPhysical: (existingDamageComposition.totalPhysical + physicalDamageDealt) / 2
+    total: ((matches - 1) * existingDamageComposition.total + totalDamageDealt) / matches,
+    totalTrue: ((matches - 1) * existingDamageComposition.totalTrue + trueDamageDealt) / matches,
+    totalMagical:
+      ((matches - 1) * existingDamageComposition.totalMagical + magicDamageDealt) / matches,
+    totalPhysical:
+      ((matches - 1) * existingDamageComposition.totalPhysical + physicalDamageDealt) / matches
   };
 }
 
@@ -44,7 +48,9 @@ function createPositionStats({ participant, existingStats = {}, now, win, timeli
   } = participant.stats;
 
   const positionStats = {
-    stats: {},
+    stats: {
+      matches: 0
+    },
     spells: {},
     items: {
       '2-12': {},
@@ -76,7 +82,8 @@ function createPositionStats({ participant, existingStats = {}, now, win, timeli
     magicDamageDealt,
     physicalDamageDealt,
     trueDamageDealt,
-    existingDamageComposition: positionStats.damageComposition
+    existingDamageComposition: positionStats.damageComposition,
+    matches: positionStats.stats.matches
   });
 
   const { spell1Id, spell2Id } = participant;
@@ -265,6 +272,9 @@ export async function postMatch(req, res) {
       analyzedAt: now
     });
 
+    updateMatchupStats({
+      match
+    });
     res.end('Analyzed');
   } catch (error) {
     console.error(error);
