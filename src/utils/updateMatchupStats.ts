@@ -1,4 +1,4 @@
-import Matchups, { updateMatchup, MatchupChampionStats } from '../models/matchups';
+import Matchups, { updateMatchup, MatchupChampionStats } from '../models/Matchups';
 import Match from '../models/Match';
 import { ParticipantStatsDTO } from '../types';
 

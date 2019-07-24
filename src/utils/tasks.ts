@@ -1,4 +1,4 @@
-import Champs, { findChamp, updateChamp, ChampMapStats } from '../models/champs';
+import Champs, { findChamp, updateChamp, ChampMapStats } from '../models/Champs';
 import { hasAnalyzedMatch, countMatches, insertAnalyzedMatch } from '../models/AnalyzedMatches';
 import getPosition from '../utils/getPosition';
 import createId from '../utils/createId';

@@ -1,7 +1,7 @@
 import { Db, MongoClient } from 'mongodb';
 
-if (!process.env.MONGODB_URI || !process.env.MONGODB_DB) {
-  throw new Error('Missing env MONGODB_URI or MONGODB_DB');
+if (!process.env.MONGODB_URI) {
+  throw new Error('Missing env MONGODB_URI ');
 }
 
 const client = new MongoClient(process.env.MONGODB_URI, { useNewUrlParser: true });
@@ -9,7 +9,7 @@ const client = new MongoClient(process.env.MONGODB_URI, { useNewUrlParser: true 
 export function getMongoDb() {
   if (client && client.isConnected) {
     // client connected, quick return
-    return client.db(process.env.MONGODB_DB);
+    return client.db();
   }
   throw new Error('Database is not connected');
 }
