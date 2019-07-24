@@ -93,6 +93,10 @@ interface ChampStatsObj {
   [key: string]: ChampStats;
 }
 
+function findPopular(stats: ChampStats) {
+  return stats.matches > 10;
+}
+
 function sortMostPlayed(a: ChampStats, b: ChampStats) {
   return b.matches - a.matches;
 }
@@ -106,7 +110,11 @@ function sortHighestWinRate(a: ChampStats, b: ChampStats) {
 }
 
 function findHighestWinRate(obj: ChampStatsObj) {
-  return omitDates(Object.values(obj).sort(sortHighestWinRate)[0]);
+  return omitDates(
+    Object.values(obj)
+      .sort(sortHighestWinRate)
+      .find(findPopular)
+  );
 }
 
 function omitDates(obj?: ChampStats) {
