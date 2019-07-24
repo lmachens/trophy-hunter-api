@@ -20,10 +20,10 @@ export function connect() {
   });
 }
 
-export function collection(collectionName: string) {
+export function collection<model>(collectionName: string) {
   if (client && client.isConnected) {
     // client connected, quick return
-    return client.db(process.env.MONGODB_DB).collection(collectionName);
+    return client.db(process.env.MONGODB_DB).collection<model>(collectionName);
   }
   throw new Error('Database is not connected');
 }

@@ -1,4 +1,6 @@
-const getPosition = ({ role, lane }) => {
+import { Role, Lane } from '../types';
+
+const getPosition = (role: Role, lane: Lane) => {
   if (lane === 'JUNGLE') {
     return 'JUNGLE';
   }

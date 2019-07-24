@@ -1,9 +1,11 @@
-import Champs from '../models/champs';
+import Champs from '../models/Champs';
+import { Request, Response } from 'express';
 
-export async function getChamp(req, res) {
-  const { mapId } = req.query;
+export async function getChamp(req: Request, res: Response) {
   const championId = parseInt(req.params.championId);
-  if (!mapId || !championId) {
+  const mapId = parseInt(req.params.mapId);
+
+  if (isNaN(req.query.mapId) || isNaN(championId)) {
     return res.status(403).end('Invalid mapId or championId');
   }
 
