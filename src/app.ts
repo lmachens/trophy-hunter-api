@@ -3,11 +3,13 @@ import { connect } from './utils/mongo';
 import { getChamp } from './routes/champs';
 import { postMatch } from './routes/matches';
 import { getMatchup } from './routes/matchups';
+import { initTasks } from './utils/tasks';
 
 const port = 5000;
 const app = express();
 
 connect().then(() => {
+  initTasks();
   app.get('/', (_req, res) => {
     res.end('API');
   });
