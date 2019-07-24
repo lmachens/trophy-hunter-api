@@ -1,4 +1,4 @@
-import Matchups from '../models/matchups';
+import Matchups from '../models/Matchups';
 
 export async function getMatchup(req, res) {
   let { mapId, championId1, championId2 } = req.query;
