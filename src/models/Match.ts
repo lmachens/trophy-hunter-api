@@ -37,7 +37,7 @@ class Match {
     return this.timelineDto;
   }
 
-  get championIds() {
+  get champIds() {
     return this.matchDto.participants.map(p => p.championId);
   }
 

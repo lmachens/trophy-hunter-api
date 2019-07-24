@@ -1,96 +1,118 @@
 import { collection } from '../utils/mongo';
 import { Maps } from '../types';
 
-export default () => {
-  const Champs = collection<Champ | null>('champs');
+export default function Champs() {
+  const Champs = collection<Champ>('champs');
   Champs.createIndex({
-    championId: 1
+    champId: 1
   });
   return Champs;
-};
+}
+
+export function findChamp(championId: number) {
+  return Champs().findOne({
+    championId
+  });
+}
+
+export function updateChamp(champId: number, mapId: number, map: ChampMapStats) {
+  return Champs().updateOne(
+    {
+      champId
+    },
+    {
+      $set: {
+        [`maps.${mapId}`]: map
+      }
+    },
+    {
+      upsert: true
+    }
+  );
+}
 
 export interface Champ {
-  championId: number;
+  champId: number;
   maps: {
-    [mapId: string]: {
-      stats: {
-        createdAt: Date;
-        matches: number;
-        winRate: number;
-        mapId: Maps;
-        lastPlayedAt: Date;
-        banRate: number;
-        pickRate: number;
+    [mapId: string]: ChampMapStats;
+  };
+}
+
+export interface ChampMapStats {
+  stats: ChampStats & {
+    mapId: Maps;
+    banRate?: number;
+    pickRate?: number;
+  };
+  positions: {
+    [position: string]: {
+      stats: ChampStats;
+      spells: {
+        [spellIds: string]: ChampStats & {
+          spell1Id: number;
+          spell2Id: number;
+        };
       };
-      positions: {
-        [position: string]: {
-          stats: {
-            createdAt: Date;
-            matches: number;
-            winRate: number;
-            lastPlayedAt: Date;
+      items: {
+        '2-12': {
+          [itemId: string]: ChampStats & {
+            itemId: number;
           };
-          spells: {
-            [spellIds: string]: {
-              createdAt: Date;
-              matches: number;
-              winRate: number;
-              spell1Id: number;
-              spell2Id: number;
-              lastPlayedAt: Date;
-            };
+        };
+        '12-22': {
+          [itemId: string]: ChampStats & {
+            itemId: number;
           };
-          items: {
-            [framesRange: string]: {
-              [itemId: string]: {
-                createdAt: Date;
-                matches: number;
-                winRate: number;
-                itemId: number;
-                lastPlayedAt: Date;
-              };
-            };
+        };
+        '22-32': {
+          [itemId: string]: ChampStats & {
+            itemId: number;
           };
-          firstItems: {
-            [itemIds: string]: {
-              createdAt: Date;
-              matches: number;
-              winRate: number;
-              items: [number];
-              lastPlayedAt: Date;
-            };
+        };
+        '32-42': {
+          [itemId: string]: ChampStats & {
+            itemId: number;
           };
-          perks: {
-            [perkIds: string]: {
-              createdAt: Date;
-              matches: number;
-              winRate: number;
-              perk0: number;
-              perk1: number;
-              perk2: number;
-              perk3: number;
-              perk4: number;
-              perk5: number;
-              lastPlayedAt: Date;
-            };
+        };
+        '42-52': {
+          [itemId: string]: ChampStats & {
+            itemId: number;
           };
-          damageComposition: {
-            total: number;
-            totalTrue: number;
-            totalMagical: number;
-            totalPhysical: number;
-          };
-          skillOrder: {
-            [skillIds: string]: {
-              createdAt: Date;
-              matches: number;
-              winRate: number;
-              order: [number];
-              lastPlayedAt: Date;
-            };
-          };
+        };
+      };
+      firstItems: {
+        [itemIds: string]: ChampStats & {
+          items: [number];
+        };
+      };
+      perks: {
+        [perkIds: string]: ChampStats & {
+          perk0: number;
+          perk1: number;
+          perk2: number;
+          perk3: number;
+          perk4: number;
+          perk5: number;
+        };
+      };
+      damageComposition: {
+        total: number;
+        totalTrue: number;
+        totalMagical: number;
+        totalPhysical: number;
+      };
+      skillOrder: {
+        [skillIds: string]: ChampStats & {
+          order: [number];
         };
       };
     };
   };
+}
+
+export interface ChampStats {
+  createdAt: Date;
+  matches: number;
+  winRate: number;
+  lastPlayedAt: Date;
 }

@@ -16,7 +16,7 @@ function getItemsPurchased({ timeline, participantId, from, minutes }) {
         );
       })
       .map(event => event.itemId);
-    return [...items, ...frameItems];
+    return [...new Set([...items, ...frameItems])];
   }, []);
 }
 

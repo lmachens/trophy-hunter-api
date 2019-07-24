@@ -1,32 +1,32 @@
 import Matchups from '../models/Matchups';
 
 export async function getMatchup(req, res) {
-  let { mapId, championId1, championId2 } = req.query;
-  if (!mapId || !championId1 || !championId2) {
+  const mapId = parseInt(req.query.mapId);
+  const champ1Id = parseInt(req.query.champ1Id);
+  const champ2Id = parseInt(req.query.champ2Id);
+  if (isNaN(mapId) || isNaN(champ1Id) || isNaN(champ2Id)) {
     return res.status(403).end('Invalid mapId or championId');
   }
-  championId1 = parseInt(championId1);
-  championId2 = parseInt(championId2);
 
   const champ = await Matchups().findOne(
     {
       [`maps.${mapId}`]: { $exists: true },
       $or: [
         {
-          championId1,
-          championId2
+          champ1Id,
+          champ2Id
         },
         {
-          championId1: championId2,
-          championId2: championId1
+          champ1Id: champ2Id,
+          champ2Id: champ1Id
         }
       ]
     },
     {
       projection: {
         _id: false,
-        championId1: true,
-        championId2: true,
+        champ1Id: true,
+        champ2Id: true,
         [`maps.${mapId}`]: true
       }
     }

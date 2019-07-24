@@ -12,7 +12,7 @@ connect().then(() => {
     res.end('API');
   });
 
-  app.get('/champs/:championId', getChamp);
+  app.get('/champs', getChamp);
   app.get('/matchups', getMatchup);
   app.post('/matches', postMatch);
 

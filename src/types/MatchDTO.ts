@@ -27,6 +27,8 @@ export interface TeamBansDTO {
 
 export interface ParticipantStatsDTO {
   kills: number;
+  deaths: number;
+  assists: number;
   win: boolean;
 }
 

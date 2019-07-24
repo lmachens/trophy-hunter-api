@@ -1,5 +1,5 @@
-import Champs from '../models/champs';
-import AnalyzedMatches from '../models/AnalyezedMatches';
+import Champs, { findChamp, updateChamp, ChampMapStats } from '../models/champs';
+import { hasAnalyzedMatch, countMatches, insertAnalyzedMatch } from '../models/AnalyzedMatches';
 import getPosition from '../utils/getPosition';
 import createId from '../utils/createId';
 import getSkillOrder from '../utils/getSkillOrder';
@@ -8,7 +8,7 @@ import updateMatchupStats from '../utils/updateMatchupStats';
 import { createMatch } from '../models/Match';
 import { Request, Response } from 'express';
 
-function createStats({ data = {}, existingStats = {}, now, win }) {
+function createStats({ data, existingStats, now, win }) {
   const stats = {
     createdAt: now,
     matches: 0,
@@ -62,18 +62,19 @@ function createPositionStats({ participant, existingStats = {}, now, win, timeli
     },
     firstItems: {},
     perks: {},
+    skillOrder: {},
     damageComposition: {
       totalTrue: trueDamageDealt,
       totalMagical: magicDamageDealt,
       total: totalDamageDealt,
       totalPhysical: physicalDamageDealt
     },
-    skillOrder: {},
     ...existingStats
   };
 
   positionStats.stats = createStats({
-    existingStats: positionStats.stats,
+    data: {},
+    existingStats: positionStats.stats || {},
     now,
     win
   });
@@ -171,75 +172,63 @@ export async function postMatch(req: Request, res: Response) {
   }
 
   try {
-    if (await AnalyzedMatches().findOne({ gameId: matchId, platformId })) {
-      res.status(400);
-      return res.end('Already analyzed');
+    if (await hasAnalyzedMatch(platformId, matchId)) {
+      return res.status(400).end('Already analyzed');
     }
+
     const match = await createMatch(platformId, matchId);
 
     const now = new Date();
     match.participants.forEach(async participant => {
       try {
-        const champ = await Champs().findOne({
-          championId: participant.championId
-        });
+        const champ = await findChamp(participant.championId);
 
         const { mapId } = match;
         const maps = (champ && champ.maps) || {};
         const win = participant.stats.win ? 1 : 0;
 
-        const map = {
+        const existingMap = maps[mapId] || {
           stats: {},
-          positions: {},
-          ...(maps[mapId] || {})
+          positions: {}
         };
-        map.stats = createStats({
-          data: { mapId },
-          existingStats: map.stats,
-          now,
-          win
-        });
-
         const { role, lane } = participant.timeline;
         const positionId = getPosition(role, lane);
-        map.positions[positionId] = createPositionStats({
-          participant,
-          now,
-          win,
-          existingStats: map.positions[positionId],
-          timeline: match.timeline
-        });
 
-        await Champs().updateOne(
-          {
-            championId: participant.championId
-          },
-          {
-            $set: {
-              [`maps.${match.mapId}`]: map
-            }
-          },
-          {
-            upsert: true
+        const map = {
+          stats: createStats({
+            data: { mapId },
+            existingStats: existingMap.stats,
+            now,
+            win
+          }),
+          positions: {
+            ...existingMap.positions,
+            [positionId]: createPositionStats({
+              participant,
+              now,
+              win,
+              existingStats: existingMap.positions[positionId],
+              timeline: match.timeline
+            })
           }
-        );
+        } as ChampMapStats;
+
+        await updateChamp(participant.championId, mapId, map);
       } catch (error) {
         console.log(error);
       }
     });
 
-    const matchesCount = await AnalyzedMatches()
-      .find({ mapId: match.mapId })
-      .count();
+    const { banIds, champIds, mapId } = match;
+    const matchesCount = await countMatches(mapId);
 
-    const { banIds, championIds } = match;
     await Champs()
       .find({
         [`maps.${match.mapId}`]: { $exists: true }
       })
       .forEach(async champ => {
-        const picked = championIds.includes(champ.championId) ? 1 : 0;
-        const banned = banIds.includes(champ.championId) ? 1 : 0;
+        const picked = champIds.includes(champ.champId) ? 1 : 0;
+        const banned = banIds.includes(champ.champId) ? 1 : 0;
         const map = champ.maps[match.mapId];
         const existingStats = map.stats;
         const pickRate =
@@ -248,7 +237,7 @@ export async function postMatch(req: Request, res: Response) {
 
         await Champs().updateOne(
           {
-            championId: champ.championId
+            championId: champ.champId
           },
           {
             $set: {
@@ -259,16 +248,14 @@ export async function postMatch(req: Request, res: Response) {
         );
       });
 
-    await AnalyzedMatches().insertOne({
+    await insertAnalyzedMatch({
       gameId: match.gameId,
       mapId: match.mapId,
       platformId,
       analyzedAt: now
     });
 
-    updateMatchupStats({
-      match
-    });
+    updateMatchupStats(match);
     res.end('Analyzed');
   } catch (error) {
     console.error(error);
