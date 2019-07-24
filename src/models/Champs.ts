@@ -39,6 +39,7 @@ export function updateChamp(champId: number, mapId: number, map: ChampMapStats) 
 }
 
 export interface Champ {
+  _id?: string;
   champId: number;
   maps: {
     [mapId: string]: ChampMapStats;

@@ -33,6 +33,7 @@ export function updateMatchup(
 }
 
 export interface Matchup {
+  _id?: string;
   champ1Id: number;
   champ2Id: number;
   maps: {

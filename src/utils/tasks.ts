@@ -6,39 +6,33 @@ import getSkillOrder from '../utils/getSkillOrder';
 import getItemsPurchased from '../utils/getItemsPurchased';
 import updateMatchupStats from '../utils/updateMatchupStats';
 import { createMatch } from '../models/Match';
-import { getMongoDb } from '../utils/mongo';
-import Agenda from 'agenda';
-
-let agenda = null;
+import Jobs from '../models/Jobs';
 
 export async function createAnalyzeMatchTask(platformId: string, matchId: number) {
-  const job = agenda.create('analyze match', { platformId, matchId });
-  await job.save();
-  console.log('Job successfully saved');
+  await Jobs().insertOne({ platformId, matchId });
+  console.log('Job successfully saved', platformId, matchId);
+}
+
+async function getNextTask() {
+  const job = await Jobs().findOne({});
+  if (job) {
+    await analyzeMatch(job.platformId, job.matchId);
+    await Jobs().deleteOne({ _id: job._id });
+  }
 }
 
 export function initTasks() {
-  agenda = new Agenda({
-    mongo: getMongoDb(),
-    defaultConcurrency: 1
-  });
-
-  agenda.define('analyze match', analyzeMatch);
-
-  agenda.start();
-
+  setInterval(getNextTask, 10000);
   console.log('Tasks initialized');
 }
 
-async function analyzeMatch(job, done) {
-  const { platformId, matchId } = job.attrs.data;
-
+async function analyzeMatch(platformId, matchId) {
   console.log(`Analyze ${platformId} ${matchId}`);
 
   try {
     if (await hasAnalyzedMatch(platformId, matchId)) {
       console.log(`Match already analyzed`);
-      return done();
+      return;
     }
 
     const match = await createMatch(platformId, matchId);
@@ -122,10 +116,8 @@ async function analyzeMatch(job, done) {
 
     await updateMatchupStats(match);
     console.log(`Done ${platformId} ${matchId}`);
-    done();
   } catch (error) {
     console.log(`Error ${platformId} ${matchId}`, error);
-    done(error);
   }
 }
 

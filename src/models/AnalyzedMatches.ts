@@ -14,6 +14,7 @@ export default function AnalyzedMatches() {
 }
 
 export interface AnalyezedMatch {
+  _id?: string;
   gameId: number;
   mapId: Maps;
   platformId: string;
