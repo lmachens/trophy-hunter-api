@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { analyzeMatch } from '../utils/tasks';
+import { createAnalyzeMatchTask } from '../utils/tasks';
 
 export async function postMatch(req: Request, res: Response) {
   const platformId = req.query.platformId && req.query.platformId.trim().toUpperCase();
@@ -8,7 +8,7 @@ export async function postMatch(req: Request, res: Response) {
     return res.status(403).end('Invalid matchId or platformId');
   }
 
-  await analyzeMatch(platformId, matchId);
+  await createAnalyzeMatchTask(platformId, matchId);
 
   res.end('Added to queue');
 }

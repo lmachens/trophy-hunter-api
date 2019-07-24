@@ -94,7 +94,7 @@ interface ChampStatsObj {
 }
 
 function sortMostPlayed(a: ChampStats, b: ChampStats) {
-  return a.matches - b.matches;
+  return b.matches - a.matches;
 }
 
 function findMostPlayed(obj: ChampStatsObj) {
@@ -102,7 +102,7 @@ function findMostPlayed(obj: ChampStatsObj) {
 }
 
 function sortHighestWinRate(a: ChampStats, b: ChampStats) {
-  return a.winRate - b.winRate;
+  return b.winRate - a.winRate;
 }
 
 function findHighestWinRate(obj: ChampStatsObj) {

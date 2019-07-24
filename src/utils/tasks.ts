@@ -11,7 +11,7 @@ import Agenda from 'agenda';
 
 let agenda = null;
 
-export async function analyzeMatch(platformId: string, matchId: number) {
+export async function createAnalyzeMatchTask(platformId: string, matchId: number) {
   const job = agenda.create('analyze match', { platformId, matchId });
   await job.save();
   console.log('Job successfully saved');
@@ -23,108 +23,110 @@ export function initTasks() {
     defaultConcurrency: 1
   });
 
-  agenda.define('analyze match', async function(job, done) {
-    const { platformId, matchId } = job.attrs.data;
-
-    console.log(`Analyze ${platformId} ${matchId}`);
-
-    try {
-      if (await hasAnalyzedMatch(platformId, matchId)) {
-        console.log(`Match already analyzed`);
-        return done();
-      }
-
-      const match = await createMatch(platformId, matchId);
-
-      const now = new Date();
-      const analyseParticipants = match.participants.map(async participant => {
-        const champ = await findChamp(participant.championId);
-
-        const { mapId } = match;
-        const maps = (champ && champ.maps) || {};
-        const win = participant.stats.win ? 1 : 0;
-
-        const existingMap = maps[mapId] || {
-          stats: {},
-          positions: {}
-        };
-        const { role, lane } = participant.timeline;
-        const positionId = getPosition(role, lane);
-
-        const map = {
-          stats: createStats({
-            data: { mapId },
-            existingStats: existingMap.stats,
-            now,
-            win
-          }),
-          positions: {
-            ...existingMap.positions,
-            [positionId]: createPositionStats({
-              participant,
-              now,
-              win,
-              existingStats: existingMap.positions[positionId],
-              timeline: match.timeline
-            })
-          }
-        } as ChampMapStats;
-
-        return updateChamp(participant.championId, mapId, map);
-      });
-
-      await Promise.all(analyseParticipants);
-
-      const { banIds, champIds, mapId } = match;
-      const matchesCount = await countMatches(mapId);
-
-      const updateChamps = (await Champs()
-        .find({
-          [`maps.${match.mapId}`]: { $exists: true }
-        })
-        .toArray()).map(champ => {
-        const picked = champIds.includes(champ.champId) ? 1 : 0;
-        const banned = banIds.includes(champ.champId) ? 1 : 0;
-        const map = champ.maps[match.mapId];
-        const existingStats = map.stats;
-        const pickRate =
-          (matchesCount * (existingStats.pickRate || 0) + picked) / (matchesCount + 1);
-        const banRate = (matchesCount * (existingStats.banRate || 0) + banned) / (matchesCount + 1);
-
-        return Champs().updateOne(
-          {
-            championId: champ.champId
-          },
-          {
-            $set: {
-              [`maps.${match.mapId}.stats.pickRate`]: pickRate,
-              [`maps.${match.mapId}.stats.banRate`]: banRate
-            }
-          }
-        );
-      });
-
-      await Promise.all(updateChamps);
-
-      await insertAnalyzedMatch({
-        gameId: match.gameId,
-        mapId: match.mapId,
-        platformId,
-        analyzedAt: now
-      });
-
-      await updateMatchupStats(match);
-      console.log(`Done ${platformId} ${matchId}`);
-      done();
-    } catch (error) {
-      console.log(`Error ${platformId} ${matchId}`, error);
-      done(error);
-    }
-  });
+  agenda.define('analyze match', analyzeMatch);
 
   agenda.start();
 
   console.log('Tasks initialized');
+}
+
+async function analyzeMatch(job, done) {
+  const { platformId, matchId } = job.attrs.data;
+
+  console.log(`Analyze ${platformId} ${matchId}`);
+
+  try {
+    if (await hasAnalyzedMatch(platformId, matchId)) {
+      console.log(`Match already analyzed`);
+      return done();
+    }
+
+    const match = await createMatch(platformId, matchId);
+
+    const now = new Date();
+    const analyseParticipants = match.participants.map(async participant => {
+      const { championId, stats, timeline } = participant;
+      const { mapId } = match;
+      const champ = await findChamp(championId, mapId);
+
+      const maps = (champ && champ.maps) || {};
+      const win = stats.win ? 1 : 0;
+
+      const existingMap = maps[mapId] || {
+        stats: {},
+        positions: {}
+      };
+      const { role, lane } = timeline;
+      const positionId = getPosition(role, lane);
+
+      const map = {
+        stats: createStats({
+          data: { mapId },
+          existingStats: existingMap.stats,
+          now,
+          win
+        }),
+        positions: {
+          ...existingMap.positions,
+          [positionId]: createPositionStats({
+            participant,
+            now,
+            win,
+            existingStats: existingMap.positions[positionId],
+            timeline: match.timeline
+          })
+        }
+      } as ChampMapStats;
+
+      return updateChamp(championId, mapId, map);
+    });
+
+    await Promise.all(analyseParticipants);
+
+    const { banIds, champIds, mapId } = match;
+    const matchesCount = await countMatches(mapId);
+
+    const updateChamps = (await Champs()
+      .find({
+        [`maps.${match.mapId}`]: { $exists: true }
+      })
+      .toArray()).map(champ => {
+      const picked = champIds.includes(champ.champId) ? 1 : 0;
+      const banned = banIds.includes(champ.champId) ? 1 : 0;
+      const map = champ.maps[match.mapId];
+      const existingStats = map.stats;
+      const pickRate = (matchesCount * (existingStats.pickRate || 0) + picked) / (matchesCount + 1);
+      const banRate = (matchesCount * (existingStats.banRate || 0) + banned) / (matchesCount + 1);
+
+      return Champs().updateOne(
+        {
+          championId: champ.champId
+        },
+        {
+          $set: {
+            [`maps.${match.mapId}.stats.pickRate`]: pickRate,
+            [`maps.${match.mapId}.stats.banRate`]: banRate
+          }
+        }
+      );
+    });
+
+    await Promise.all(updateChamps);
+
+    await insertAnalyzedMatch({
+      gameId: match.gameId,
+      mapId: match.mapId,
+      platformId,
+      analyzedAt: now
+    });
+
+    await updateMatchupStats(match);
+    console.log(`Done ${platformId} ${matchId}`);
+    done();
+  } catch (error) {
+    console.log(`Error ${platformId} ${matchId}`, error);
+    done(error);
+  }
 }
 
 function createStats({ data, existingStats, now, win }) {

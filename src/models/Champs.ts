@@ -9,10 +9,17 @@ export default function Champs() {
   return Champs;
 }
 
-export function findChamp(championId: number) {
-  return Champs().findOne({
-    championId
-  });
+export function findChamp(champId: number, mapId) {
+  return Champs().findOne(
+    {
+      champId
+    },
+    {
+      projection: {
+        [`maps.${mapId}`]: true
+      }
+    }
+  );
 }
 
 export function updateChamp(champId: number, mapId: number, map: ChampMapStats) {
