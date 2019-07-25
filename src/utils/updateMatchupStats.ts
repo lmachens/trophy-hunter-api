@@ -1,6 +1,7 @@
 import Matchups, { updateMatchup, MatchupChampionStats } from '../models/Matchups';
 import Match from '../models/Match';
 import { ParticipantStatsDTO } from '../types';
+import { sortNumbers } from './sort';
 
 function createChampStats(
   participantStats: ParticipantStatsDTO,
@@ -20,7 +21,7 @@ function updateMatchupStats(match: Match) {
 
   const team1Promises = team1.map(participant => {
     const team2Promises = team2.map(async opponent => {
-      const [champ1Id, champ2Id] = [participant.championId, opponent.championId].sort();
+      const [champ1Id, champ2Id] = [participant.championId, opponent.championId].sort(sortNumbers);
 
       const matchup = await Matchups().findOne({
         champ1Id,
