@@ -1,5 +1,6 @@
 import Champs, { Champ, ChampStats } from '../models/Champs';
 import { Request, Response } from 'express';
+import { sortWinRate } from '../utils/sort';
 
 export async function getChamp(req: Request, res: Response) {
   res.set('Cache-Control', 'public, max-age=86400');
@@ -34,44 +35,17 @@ function filterChamp(champ: Champ) {
   const positions = Object.entries(map.positions).reduce((positions, [key, value]) => {
     const position = {
       ...omitDates(value.stats),
-      spells: {
-        mostPlayed: findMostPlayed(value.spells),
-        higestWinRate: findHighestWinRate(value.spells)
-      },
+      spells: filterTop(value.spells, value.stats.matches, 2),
       items: {
-        '2-12': {
-          mostPlayed: findMostPlayed(value.items['2-12']),
-          higestWinRate: findHighestWinRate(value.items['2-12'])
-        },
-        '12-22': {
-          mostPlayed: findMostPlayed(value.items['12-22']),
-          higestWinRate: findHighestWinRate(value.items['12-22'])
-        },
-        '22-32': {
-          mostPlayed: findMostPlayed(value.items['22-32']),
-          higestWinRate: findHighestWinRate(value.items['22-32'])
-        },
-        '32-42': {
-          mostPlayed: findMostPlayed(value.items['32-42']),
-          higestWinRate: findHighestWinRate(value.items['32-42'])
-        },
-        '42-52': {
-          mostPlayed: findMostPlayed(value.items['42-52']),
-          higestWinRate: findHighestWinRate(value.items['42-52'])
-        }
+        '2-12': filterTop(value.items['2-12'].items, value.items['2-12'].stats.matches, 5),
+        '12-22': filterTop(value.items['12-22'].items, value.items['12-22'].stats.matches, 5),
+        '22-32': filterTop(value.items['22-32'].items, value.items['22-32'].stats.matches, 5),
+        '32-42': filterTop(value.items['32-42'].items, value.items['32-42'].stats.matches, 5),
+        '42-52': filterTop(value.items['42-52'].items, value.items['42-52'].stats.matches, 5)
       },
-      firstItems: {
-        mostPlayed: findMostPlayed(value.firstItems),
-        higestWinRate: findHighestWinRate(value.firstItems)
-      },
-      perks: {
-        mostPlayed: findMostPlayed(value.perks),
-        higestWinRate: findHighestWinRate(value.perks)
-      },
-      skillOrder: {
-        mostPlayed: findMostPlayed(value.skillOrder),
-        higestWinRate: findHighestWinRate(value.skillOrder)
-      },
+      firstItems: filterTop(value.firstItems, value.stats.matches, 2),
+      perks: filterTop(value.perks, value.stats.matches, 2),
+      skillOrder: filterTop(value.skillOrder, value.stats.matches, 2),
       damageComposition: value.damageComposition
     };
     return {
@@ -93,28 +67,12 @@ interface ChampStatsObj {
   [key: string]: ChampStats;
 }
 
-function findPopular(stats: ChampStats) {
-  return stats.matches > 10;
-}
-
-function sortMostPlayed(a: ChampStats, b: ChampStats) {
-  return b.matches - a.matches;
-}
-
-function findMostPlayed(obj: ChampStatsObj) {
-  return omitDates(Object.values(obj).sort(sortMostPlayed)[0]);
-}
-
-function sortHighestWinRate(a: ChampStats, b: ChampStats) {
-  return b.winRate - a.winRate;
-}
-
-function findHighestWinRate(obj: ChampStatsObj) {
-  return omitDates(
-    Object.values(obj)
-      .sort(sortHighestWinRate)
-      .find(findPopular)
-  );
+function filterTop(obj: ChampStatsObj, matches: number, limit = 1, threshold = 0.1) {
+  return Object.values(obj)
+    .filter(stats => stats.matches / matches > threshold)
+    .sort(sortWinRate)
+    .slice(0, limit)
+    .map(omitDates);
 }
 
 function omitDates(obj?: ChampStats) {

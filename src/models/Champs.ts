@@ -63,28 +63,43 @@ export interface ChampMapStats {
       };
       items: {
         '2-12': {
-          [itemId: string]: ChampStats & {
-            itemId: number;
+          stats: ChampStats;
+          items: {
+            [itemId: string]: ChampStats & {
+              itemId: number;
+            };
           };
         };
         '12-22': {
-          [itemId: string]: ChampStats & {
-            itemId: number;
+          stats: ChampStats;
+          items: {
+            [itemId: string]: ChampStats & {
+              itemId: number;
+            };
           };
         };
         '22-32': {
-          [itemId: string]: ChampStats & {
-            itemId: number;
+          stats: ChampStats;
+          items: {
+            [itemId: string]: ChampStats & {
+              itemId: number;
+            };
           };
         };
         '32-42': {
-          [itemId: string]: ChampStats & {
-            itemId: number;
+          stats: ChampStats;
+          items: {
+            [itemId: string]: ChampStats & {
+              itemId: number;
+            };
           };
         };
         '42-52': {
-          [itemId: string]: ChampStats & {
-            itemId: number;
+          stats: ChampStats;
+          items: {
+            [itemId: string]: ChampStats & {
+              itemId: number;
+            };
           };
         };
       };

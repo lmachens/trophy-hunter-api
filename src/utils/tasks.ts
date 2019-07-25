@@ -7,6 +7,7 @@ import getItemsPurchased from '../utils/getItemsPurchased';
 import updateMatchupStats from '../utils/updateMatchupStats';
 import { createMatch } from '../models/Match';
 import Jobs from '../models/Jobs';
+import { sortNumbers } from './sort';
 
 export async function createAnalyzeMatchTask(platformId: string, matchId: number) {
   await Jobs().insertOne({ platformId, matchId });
@@ -167,11 +168,26 @@ function createPositionStats({ participant, existingStats = {}, now, win, timeli
     },
     spells: {},
     items: {
-      '2-12': {},
-      '12-22': {},
-      '22-32': {},
-      '32-42': {},
-      '42-52': {}
+      '2-12': {
+        stats: {},
+        items: {}
+      },
+      '12-22': {
+        stats: {},
+        items: {}
+      },
+      '22-32': {
+        stats: {},
+        items: {}
+      },
+      '32-42': {
+        stats: {},
+        items: {}
+      },
+      '42-52': {
+        stats: {},
+        items: {}
+      }
     },
     firstItems: {},
     perks: {},
@@ -201,7 +217,7 @@ function createPositionStats({ participant, existingStats = {}, now, win, timeli
     matches: positionStats.stats.matches
   });
 
-  const { spell1Id, spell2Id } = participant;
+  const [spell1Id, spell2Id] = [participant.spell1Id, participant.spell2Id].sort(sortNumbers);
   const spells = { spell1Id, spell2Id };
   const spellsId = createId(spells);
   positionStats.spells[spellsId] = createStats({
@@ -221,8 +237,12 @@ function createPositionStats({ participant, existingStats = {}, now, win, timeli
     win
   });
 
-  const skillOrder = getSkillOrder({ timeline, participantId: participant.participantId });
-  if (skillOrder.length === 18) {
+  // Select first 10 skills. In most games champs are not max lvl.
+  const skillOrder = getSkillOrder({ timeline, participantId: participant.participantId }).splice(
+    0,
+    10
+  );
+  if (skillOrder.length === 10) {
     const skillOrderId = skillOrder.join('-');
     positionStats.skillOrder[skillOrderId] = createStats({
       data: {
@@ -243,12 +263,19 @@ function createPositionStats({ participant, existingStats = {}, now, win, timeli
       minutes: 10
     });
     if (items.length > 0) {
+      const currentPositionStats = positionStats.items[`${from}-${from + 10}`];
+      currentPositionStats.stats = createStats({
+        data: {},
+        existingStats: currentPositionStats.stats,
+        now,
+        win
+      });
       items.forEach(itemId => {
-        positionStats.items[`${from}-${from + 10}`][itemId] = createStats({
+        currentPositionStats.items[itemId] = createStats({
           data: {
             itemId
           },
-          existingStats: positionStats.items[`${from}-${from + 10}`][itemId],
+          existingStats: currentPositionStats[itemId],
           now,
           win
         });
