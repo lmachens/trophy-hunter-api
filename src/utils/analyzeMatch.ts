@@ -258,7 +258,7 @@ function createPositionStats({ participant, existingStats = {}, now, win, timeli
           data: {
             itemId
           },
-          existingStats: currentPositionStats[itemId],
+          existingStats: currentPositionStats.items[itemId],
           now,
           win
         });
