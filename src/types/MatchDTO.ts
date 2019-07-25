@@ -30,6 +30,10 @@ export interface ParticipantStatsDTO {
   deaths: number;
   assists: number;
   win: boolean;
+  totalDamageDealt: number;
+  trueDamageDealt: number;
+  magicDamageDealt: number;
+  physicalDamageDealt: number;
 }
 
 export interface ParticipantTimelineDTO {

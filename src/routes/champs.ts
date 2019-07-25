@@ -46,7 +46,7 @@ function filterChamp(champ: Champ) {
       firstItems: filterTop(value.firstItems, value.stats.matches, 2),
       perks: filterTop(value.perks, value.stats.matches, 2),
       skillOrder: filterTop(value.skillOrder, value.stats.matches, 2),
-      damageComposition: value.damageComposition
+      averageStats: value.averageStats
     };
     return {
       ...positions,

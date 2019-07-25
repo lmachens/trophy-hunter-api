@@ -118,12 +118,7 @@ export interface ChampMapStats {
           perk5: number;
         };
       };
-      damageComposition: {
-        total: number;
-        totalTrue: number;
-        totalMagical: number;
-        totalPhysical: number;
-      };
+      averageStats: ChampAverageStats;
       skillOrder: {
         [skillIds: string]: ChampStats & {
           order: [number];
@@ -131,6 +126,16 @@ export interface ChampMapStats {
       };
     };
   };
+}
+
+export interface ChampAverageStats {
+  totalDamageDealt: number;
+  trueDamageDealt: number;
+  magicDamageDealt: number;
+  physicalDamageDealt: number;
+  kills: number;
+  deaths: number;
+  assists: number;
 }
 
 export interface ChampStats {
