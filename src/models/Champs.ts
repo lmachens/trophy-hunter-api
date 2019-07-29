@@ -136,6 +136,7 @@ export interface ChampAverageStats {
   kills: number;
   deaths: number;
   assists: number;
+  snowballKills: number;
 }
 
 export interface ChampStats {

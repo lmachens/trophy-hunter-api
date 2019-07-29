@@ -52,4 +52,6 @@ export interface MatchupChampionStats {
   deaths: number;
   assists: number;
   winRate: number;
+  goldEarned: number;
+  totalDamageDealtToChampions: number;
 }
