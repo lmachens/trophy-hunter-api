@@ -143,8 +143,7 @@ function createAverageStats(
     'physicalDamageDealt',
     'kills',
     'deaths',
-    'assists',
-    'firstBloodKill'
+    'assists'
   ];
 
   const participantFrames = getParticipantFrames(timeline, participantId);
@@ -152,16 +151,20 @@ function createAverageStats(
   const snowballKills = participantFrames.filter(
     event => event.killerId === participantId && event.timestamp < 720000
   ).length;
+  const firstBloodKills =
+    ((matches - 1) * existingDamageComposition.firstBloodKills + Number(stats.firstBloodKill)) /
+    matches;
 
   return keys.reduce(
     (obj, key) => {
       return {
         ...obj,
-        [key]: ((matches - 1) * Number(existingDamageComposition[key]) + stats[key]) / matches
+        [key]: ((matches - 1) * existingDamageComposition[key] + stats[key]) / matches
       };
     },
     {
-      snowballKills
+      snowballKills,
+      firstBloodKills
     } as ChampAverageStats
   );
 }
@@ -205,7 +208,8 @@ function createPositionStats({ participant, existingStats = {}, now, win, timeli
       kills: 0,
       deaths: 0,
       assists: 0,
-      snowballKills: 0
+      snowballKills: 0,
+      firstBloodKills: 0
     },
     ...existingStats
   };
