@@ -1,4 +1,6 @@
 import express from 'express';
+import cors from 'cors';
+import compression from 'compression';
 import { connect } from './utils/mongo';
 import { getChamp } from './routes/champs';
 import { postMatch } from './routes/matches';
@@ -10,6 +12,10 @@ const app = express();
 
 connect().then(() => {
   initTasks();
+
+  app.use(compression());
+  app.use(cors());
+
   app.get('/', (_req, res) => {
     res.end('API');
   });
