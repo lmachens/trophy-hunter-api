@@ -37,6 +37,8 @@ export interface ParticipantStatsDTO {
   firstBloodKill: boolean;
   goldEarned: number;
   totalDamageDealtToChampions: number;
+  killingSprees: number;
+  totalMinionsKilled: number;
 }
 
 export interface ParticipantTimelineDTO {

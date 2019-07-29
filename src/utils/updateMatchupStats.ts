@@ -17,6 +17,11 @@ function createChampStats(
     totalDamageDealtToChampions:
       (matches * existingStats.totalDamageDealtToChampions +
         participantStats.totalDamageDealtToChampions) /
+      (matches + 1),
+    killingSprees:
+      (matches * existingStats.killingSprees + participantStats.killingSprees) / (matches + 1),
+    totalMinionsKilled:
+      (matches * existingStats.totalMinionsKilled + participantStats.totalMinionsKilled) /
       (matches + 1)
   };
 }
