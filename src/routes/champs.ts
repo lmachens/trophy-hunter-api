@@ -59,6 +59,8 @@ function filterChamp(champ: Champ) {
     mapId: parseInt(mapId),
     matches: map.stats.matches,
     winRate: map.stats.winRate,
+    banRate: map.stats.banRate,
+    pickRate: map.stats.pickRate,
     positions
   };
 }
