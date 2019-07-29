@@ -54,4 +54,6 @@ export interface MatchupChampionStats {
   winRate: number;
   goldEarned: number;
   totalDamageDealtToChampions: number;
+  killingSprees: number;
+  totalMinionsKilled: number;
 }
