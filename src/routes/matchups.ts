@@ -1,7 +1,7 @@
 import Matchups, { Matchup } from '../models/Matchups';
 
 export async function getMatchup(req, res) {
-  res.set('Cache-Control', 'public, max-age=86400');
+  res.set('Cache-Control', 'public, max-age=1200');
   const mapId = parseInt(req.query.mapId);
   const champ1Id = parseInt(req.query.champ1Id);
   const champ2Id = parseInt(req.query.champ2Id);
