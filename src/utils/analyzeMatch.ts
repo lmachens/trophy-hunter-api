@@ -8,7 +8,7 @@ import updateMatchupStats from '../utils/updateMatchupStats';
 import { createMatch } from '../models/Match';
 
 import { sortNumbers } from './sort';
-import { ParticipantStatsDTO } from '../types';
+import { ParticipantStatsDTO, TimelineDTO, TimelineEvent } from '../types';
 
 export default async function analyzeMatch(platformId, matchId) {
   console.log(`Analyze ${platformId} ${matchId}`);
@@ -66,19 +66,19 @@ export default async function analyzeMatch(platformId, matchId) {
 
     const updateChamps = (await Champs()
       .find({
-        [`maps.${match.mapId}`]: { $exists: true }
+        [`maps.${mapId}`]: { $exists: true }
       })
       .toArray()).map(champ => {
       const picked = champIds.includes(champ.champId) ? 1 : 0;
       const banned = banIds.includes(champ.champId) ? 1 : 0;
-      const map = champ.maps[match.mapId];
+      const map = champ.maps[mapId];
       const existingStats = map.stats;
       const pickRate = (matchesCount * (existingStats.pickRate || 0) + picked) / (matchesCount + 1);
       const banRate = (matchesCount * (existingStats.banRate || 0) + banned) / (matchesCount + 1);
 
       return Champs().updateOne(
         {
-          championId: champ.champId
+          champId: champ.champId
         },
         {
           $set: {
@@ -119,10 +119,22 @@ function createStats({ data, existingStats, now, win }) {
   return stats;
 }
 
+function getParticipantFrames(timeline: TimelineDTO, participantId: number) {
+  return timeline.frames.reduce(
+    (acc, cur) => {
+      const participantFrames = cur.events.filter(event => event.participantId === participantId);
+      return [...acc, ...participantFrames];
+    },
+    [] as TimelineEvent[]
+  );
+}
+
 function createAverageStats(
   stats: ParticipantStatsDTO,
   existingDamageComposition: ChampAverageStats,
-  matches
+  matches,
+  timeline: TimelineDTO,
+  participantId
 ) {
   const keys = [
     'totalDamageDealt',
@@ -133,6 +145,16 @@ function createAverageStats(
     'deaths',
     'assists'
   ];
+
+  const participantFrames = getParticipantFrames(timeline, participantId);
+
+  const snowballKills = participantFrames.filter(
+    event => event.killerId === participantId && event.timestamp < 720000
+  ).length;
+  const firstBloodKills =
+    ((matches - 1) * existingDamageComposition.firstBloodKills + Number(stats.firstBloodKill)) /
+    matches;
+
   return keys.reduce(
     (obj, key) => {
       return {
@@ -140,7 +162,10 @@ function createAverageStats(
         [key]: ((matches - 1) * existingDamageComposition[key] + stats[key]) / matches
       };
     },
-    {} as ChampAverageStats
+    {
+      snowballKills,
+      firstBloodKills
+    } as ChampAverageStats
   );
 }
 
@@ -182,7 +207,9 @@ function createPositionStats({ participant, existingStats = {}, now, win, timeli
       physicalDamageDealt: 0,
       kills: 0,
       deaths: 0,
-      assists: 0
+      assists: 0,
+      snowballKills: 0,
+      firstBloodKills: 0
     },
     ...existingStats
   };
@@ -197,7 +224,9 @@ function createPositionStats({ participant, existingStats = {}, now, win, timeli
   positionStats.averageStats = createAverageStats(
     participant.stats,
     positionStats.averageStats,
-    positionStats.stats.matches
+    positionStats.stats.matches,
+    timeline,
+    participant.participantId
   );
 
   const [spell1Id, spell2Id] = [participant.spell1Id, participant.spell2Id].sort(sortNumbers);
@@ -210,8 +239,32 @@ function createPositionStats({ participant, existingStats = {}, now, win, timeli
     win
   });
 
-  const { perk0, perk1, perk2, perk3, perk4, perk5 } = participant.stats;
-  const perks = { perk0, perk1, perk2, perk3, perk4, perk5 };
+  const {
+    perkPrimaryStyle,
+    perkSubStyle,
+    perk0,
+    perk1,
+    perk2,
+    perk3,
+    perk4,
+    perk5,
+    statPerk0,
+    statPerk1,
+    statPerk2
+  } = participant.stats;
+  const perks = {
+    perkPrimaryStyle,
+    perkSubStyle,
+    perk0,
+    perk1,
+    perk2,
+    perk3,
+    perk4,
+    perk5,
+    statPerk0,
+    statPerk1,
+    statPerk2
+  };
   const perkIds = createId(perks);
   positionStats.perks[perkIds] = createStats({
     data: perks,

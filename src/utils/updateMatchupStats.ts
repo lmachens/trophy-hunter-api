@@ -12,7 +12,17 @@ function createChampStats(
     winRate: (matches * existingStats.winRate + Number(participantStats.win)) / (matches + 1),
     kills: (matches * existingStats.kills + participantStats.kills) / (matches + 1),
     deaths: (matches * existingStats.deaths + participantStats.deaths) / (matches + 1),
-    assists: (matches * existingStats.assists + participantStats.assists) / (matches + 1)
+    assists: (matches * existingStats.assists + participantStats.assists) / (matches + 1),
+    goldEarned: (matches * existingStats.goldEarned + participantStats.goldEarned) / (matches + 1),
+    totalDamageDealtToChampions:
+      (matches * existingStats.totalDamageDealtToChampions +
+        participantStats.totalDamageDealtToChampions) /
+      (matches + 1),
+    killingSprees:
+      (matches * existingStats.killingSprees + participantStats.killingSprees) / (matches + 1),
+    totalMinionsKilled:
+      (matches * existingStats.totalMinionsKilled + participantStats.totalMinionsKilled) /
+      (matches + 1)
   };
 }
 
@@ -34,9 +44,22 @@ function updateMatchupStats(match: Match) {
           kills: 0,
           deaths: 0,
           assists: 0,
-          winRate: 0
+          winRate: 0,
+          goldEarned: 0,
+          totalDamageDealtToChampions: 0,
+          killingSprees: 0,
+          totalMinionsKilled: 0
         },
-        champ2: { kills: 0, deaths: 0, assists: 0, winRate: 0 },
+        champ2: {
+          kills: 0,
+          deaths: 0,
+          assists: 0,
+          winRate: 0,
+          goldEarned: 0,
+          totalDamageDealtToChampions: 0,
+          killingSprees: 0,
+          totalMinionsKilled: 0
+        },
         ...(maps[match.mapId] || {})
       };
 

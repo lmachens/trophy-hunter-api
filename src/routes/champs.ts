@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { sortWinRate } from '../utils/sort';
 
 export async function getChamp(req: Request, res: Response) {
-  res.set('Cache-Control', 'public, max-age=86400');
+  res.set('Cache-Control', 'public, max-age=1200');
   const champId = parseInt(req.query.champId);
   const mapId = parseInt(req.query.mapId);
 
@@ -59,6 +59,8 @@ function filterChamp(champ: Champ) {
     mapId: parseInt(mapId),
     matches: map.stats.matches,
     winRate: map.stats.winRate,
+    banRate: map.stats.banRate,
+    pickRate: map.stats.pickRate,
     positions
   };
 }
