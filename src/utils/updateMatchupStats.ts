@@ -64,7 +64,7 @@ function updateMatchupStats(match: Match) {
       };
 
       map.champ1 = createChampStats(participant.stats, map.champ1, map.matches);
-      map.champ2 = createChampStats(opponent.stats, map.champ1, map.matches);
+      map.champ2 = createChampStats(opponent.stats, map.champ2, map.matches);
 
       map.matches++;
 
