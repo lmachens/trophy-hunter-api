@@ -12,9 +12,10 @@ async function getNextTask() {
     await analyzeMatch(job.platformId, job.matchId);
     await Jobs().deleteOne({ _id: job._id });
   }
+  setTimeout(getNextTask, 10000);
 }
 
 export function initTasks() {
-  setInterval(getNextTask, 10000);
+  setTimeout(getNextTask, 5000);
   console.log('Tasks initialized');
 }

@@ -25,6 +25,7 @@ export default async function analyzeMatch(platformId, matchId) {
     const analyseParticipants = match.participants.map(async participant => {
       const { championId, stats, timeline } = participant;
       const { mapId } = match;
+
       const champ = await findChamp(championId, mapId);
 
       const maps = (champ && champ.maps) || {};
@@ -56,18 +57,26 @@ export default async function analyzeMatch(platformId, matchId) {
         }
       } as ChampMapStats;
 
-      return updateChamp(championId, mapId, map);
+      await updateChamp(championId, mapId, map);
     });
-
     await Promise.all(analyseParticipants);
 
     const { banIds, champIds, mapId } = match;
+
     const matchesCount = await countMatches(mapId);
 
     const updateChamps = (await Champs()
-      .find({
-        [`maps.${mapId}`]: { $exists: true }
-      })
+      .find(
+        {
+          [`maps.${mapId}`]: { $exists: true }
+        },
+        {
+          projection: {
+            champId: true,
+            [`maps.${mapId}.stats`]: true
+          }
+        }
+      )
       .toArray()).map(champ => {
       const picked = champIds.includes(champ.champId) ? 1 : 0;
       const banned = banIds.includes(champ.champId) ? 1 : 0;
@@ -101,7 +110,7 @@ export default async function analyzeMatch(platformId, matchId) {
     await updateMatchupStats(match);
     console.log(`Done ${platformId} ${matchId}`);
   } catch (error) {
-    console.log(`Error ${platformId} ${matchId}`, error);
+    console.error(`Error ${platformId} ${matchId}`, error.message);
   }
 }
 
